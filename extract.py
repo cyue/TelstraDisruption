@@ -52,41 +52,32 @@ def make_table(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log):
     tbl = {}
 
     for record in extract_train(csv_train):
-        tbl.setdefault(record[0], [record[1],record[2]])
+        # id, [[location, fault], [event_type...], [resource_type...], [severity_type], [log_feature...]]
+        tbl.setdefault(record[0], [[record[1], record[2]], [], [], [], []])
 
     for record in extract_event(csv_event_type):
         if record[0] not in tbl:
-            # positive sample recorded
-            tbl.setdefault(record[0], ['0', '0', record[1]])
+            tbl.setdefault(record[0], [['0', '0'], [record[1]], [], [], []])
         else:
-            # negative sample 
-            tbl[record[0]].append(record[1])
+            tbl[record[0]][1].append(record[1])
 
     for record in extract_res(csv_res_type):
         if record[0] not in tbl:
-            # positive sample recorded
-            tbl.setdefault(record[0], ['0', '0', '0', record[1]])
+            tbl.setdefault(record[0], [['0', '0'], ['0'], [record[1]], [], []])
         else:
-            # negative sample 
-            tbl[record[0]].append(record[1])
+            tbl[record[0]][2].append(record[1])
 
     for record in extract_sevr(csv_sevr_type):
         if record[0] not in tbl:
-            # positive sample recorded
-            tbl.setdefault(record[0], ['0', '0', '0', '0', record[1]])
+            tbl.setdefault(record[0], [['0', '0'], ['0'], ['0'], [record[1]], []])
         else:
-            # negative sample 
-            tbl[record[0]].append(record[1])
+            tbl[record[0]][3].append(record[1])
 
     for record in extract_log(csv_log):
         if record[0] not in tbl:
-            # positive sample recorded
-            tbl.setdefault(record[0], ['0', '0', '0', '0', '0', record[1], record[2]])
+            tbl.setdefault(record[0], [['0', '0'], ['0'], ['0'], ['0'], [[record[1], record[2]]]])
         else:
-            # negative sample 
-            tbl[record[0]].append(record[1])
-            tbl[record[0]].append(record[2])
-        print tbl
+            tbl[record[0]][4].append([record[1], record[2]])
 
     return tbl
 
@@ -114,11 +105,25 @@ def main():
     tbl = make_table(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log)
     #for key in tbl:
     #    print key, ' '.join(tbl[key])
-
+    for key in tbl:
+        id = key
+        location = tbl[id][0][0]
+        fault = tbl[id][0][1]
+        for event in tbl[id][1]:
+            for resource in tbl[id][2]:
+                for severity in tbl[id][3]:
+                    for log in tbl[id][4]:
+                        feature = log[0]
+                        vol = log[1]
+                        if location == '0' and fault == '0':
+                            continue
+                        else:
+                            print '%s,%s,%s,%s,%s,%s,%s,%s' % (id, location, event, resource, severity, feature, vol, fault)
+                        
 
 if __name__ == '__main__':
-    #main()
-    test()
+    main()
+    #test()
 
     
     
