@@ -11,16 +11,6 @@ def extract_train(csv_train):
             yield id, location, fault
 
 
-def extract_test(csv_test):
-    with open(csv_test) as f:
-        f.readline()
-        for line in f:
-            row = line.strip().split(',')
-            id = row[0]
-            location = row[1].split(' ')[1]
-            yield id, location
-
-
 def extract_event(csv_event_type):
     with open(csv_event_type) as f:
         f.readline()
@@ -58,7 +48,7 @@ def extract_log(csv_log):
             vol = row[2]
             yield id, log_code, vol
 
-def make_train_tbl(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log):
+def make_table(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log):
     tbl = {}
 
     for record in extract_train(csv_train):
@@ -66,44 +56,27 @@ def make_train_tbl(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_l
         tbl.setdefault(record[0], [[record[1], record[2]], [], [], [], []])
 
     for record in extract_event(csv_event_type):
-        if record[0] in tbl:
+        if record[0] not in tbl:
+            tbl.setdefault(record[0], [['0', '0'], [record[1]], [], [], []])
+        else:
             tbl[record[0]][1].append(record[1])
 
     for record in extract_res(csv_res_type):
-        if record[0] in tbl:
+        if record[0] not in tbl:
+            tbl.setdefault(record[0], [['0', '0'], ['0'], [record[1]], [], []])
+        else:
             tbl[record[0]][2].append(record[1])
 
     for record in extract_sevr(csv_sevr_type):
-        if record[0] in tbl:
+        if record[0] not in tbl:
+            tbl.setdefault(record[0], [['0', '0'], ['0'], ['0'], [record[1]], []])
+        else:
             tbl[record[0]][3].append(record[1])
 
     for record in extract_log(csv_log):
-        if record[0] in tbl:
-            tbl[record[0]][4].append([record[1], record[2]])
-
-    return tbl
-
-def make_test_tbl(csv_test, csv_event_type, csv_res_type, csv_sevr_type, csv_log):
-    tbl = {}
-
-    for record in extract_test(csv_test):
-        # id, [[location], [event_type...], [resource_type...], [severity_type], [log_feature...]]
-        tbl.setdefault(record[0], [[record[1]], [], [], [], []])
-
-    for record in extract_event(csv_event_type):
-        if record[0] in tbl:
-            tbl[record[0]][1].append(record[1])
-
-    for record in extract_res(csv_res_type):
-        if record[0] in tbl:
-            tbl[record[0]][2].append(record[1])
-
-    for record in extract_sevr(csv_sevr_type):
-        if record[0] in tbl:
-            tbl[record[0]][3].append(record[1])
-
-    for record in extract_log(csv_log):
-        if record[0] in tbl:
+        if record[0] not in tbl:
+            tbl.setdefault(record[0], [['0', '0'], ['0'], ['0'], ['0'], [[record[1], record[2]]]])
+        else:
             tbl[record[0]][4].append([record[1], record[2]])
 
     return tbl
@@ -120,10 +93,8 @@ def test():
         print rec
         sys.exit()
 
-
 def main():
     csv_train = '../data/train.csv'
-    csv_test = '../data/test.csv'
     csv_event_type = '../data/event_type.csv'
     csv_sevr_type= '../data/severity_type.csv'
     csv_res_type = '../data/resource_type.csv'
@@ -131,8 +102,7 @@ def main():
 
     
 
-    tbl = make_train_tbl(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log)
-    file = open('./train.csv', 'w')
+    tbl = make_table(csv_train, csv_event_type, csv_res_type, csv_sevr_type, csv_log)
     #for key in tbl:
     #    print key, ' '.join(tbl[key])
     for key in tbl:
@@ -148,27 +118,7 @@ def main():
                         if location == '0' and fault == '0':
                             continue
                         else:
-                            file.write('%s,%s,%s,%s,%s,%s,%s,%s\n' % (id, location, event, resource, severity, feature, vol, fault))
-
-
-    tbl = make_test_tbl(csv_test, csv_event_type, csv_res_type, csv_sevr_type, csv_log)
-    file = open('./test.csv', 'w')
-    #for key in tbl:
-    #    print key, ' '.join(tbl[key])
-    for key in tbl:
-        id = key
-        location = tbl[id][0][0]
-        for event in tbl[id][1]:
-            for resource in tbl[id][2]:
-                for severity in tbl[id][3]:
-                    for log in tbl[id][4]:
-                        feature = log[0]
-                        vol = log[1]
-                        if location == '0': 
-                            continue
-                        else:
-                            file.write('%s,%s,%s,%s,%s,%s,%s\n' % (id, location, event, resource, severity, feature, vol)) 
- 
+                            print '%s,%s,%s,%s,%s,%s,%s,%s' % (id, location, event, resource, severity, feature, vol, fault)
                         
 
 if __name__ == '__main__':
