@@ -22,3 +22,7 @@ id	location	event_type	resource_type	severity_type	log_feature	log_volumn	fault
 
 # fault distribution
 0:59%	1:26%	2:14%
+
+# distributions of features
+1. location
+
