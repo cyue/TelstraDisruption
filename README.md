@@ -20,9 +20,21 @@ fault_severity -
 - id	location	event_type	resource_type	severity_type	log_feature	log_volumn	fault
 - 61838	929		49		10		5		331		254		3
 
-# fault distribution
-0:59%	1:26%	2:14%
-
 # distributions of features
 1. location
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/1.png)
+2. event_type
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/2.png)
+3. resource_type
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/3.png)
+4. severity_type
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/4.png)
+5. log_feature
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/5.png)
+6. log_volumn
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/6.png)
+7. fault
+- ![Alt Text](https://raw.githubusercontent.com/cyue/TelstraDisruption/master/img/7.png)
+
+
 
