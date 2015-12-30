@@ -25,5 +25,4 @@ id	location	event_type	resource_type	severity_type	log_feature	log_volumn	fault
 
 # distributions of features
 1. location
-![Alt Text](http://www.sheawong.com/wp-content/uploads/2013/08/keephatin.gif)
 
