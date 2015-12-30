@@ -17,8 +17,8 @@ fault_severity -
 	
 
 # Feature extracted
-id	location	event_type	resource_type	severity_type	log_feature	log_volumn	fault
-61838	929	49	10	5	331	254	3
+- id	location	event_type	resource_type	severity_type	log_feature	log_volumn	fault
+- 61838	929		49		10		5		331		254		3
 
 # fault distribution
 0:59%	1:26%	2:14%
