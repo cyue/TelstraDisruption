@@ -46,7 +46,7 @@ def decision_graph(classifier):
     str_buffer = StringIO()
     tree.export_graphviz(classifier, out_file=str_buffer)
     graph = pydot.graph_from_dot_data(str_buffer.getvalue())
-    graph.write("decision_graph.jpg")
+    graph.write("../img/decision_graph.jpg")
 
 
 def main():
