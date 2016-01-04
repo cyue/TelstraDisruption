@@ -13,7 +13,7 @@ def get_training_data(file_train):
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
-    x = data[:,:-1]
+    x = data[:,1:-1]
     y = data[:,-1]
     return x, y
 
@@ -23,7 +23,7 @@ def get_test_data(file_test):
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
-    return data
+    return data[:,1:]
 
 
 def train(x,y,depth=10):
