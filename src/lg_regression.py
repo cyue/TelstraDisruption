@@ -5,6 +5,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn import cross_validation as CV
 from sklearn.cross_validation import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn import preprocessing
 
 
 def train(x, y):
@@ -53,7 +55,7 @@ def cross_val_score(estimators, x, y, cv=10):
     return scores
     
     
-def get_training_data(file_train):
+def get_training_data(file_train, with_scale=True):
     data = np.genfromtxt(fname=file_train, delimiter=',')
     # split log volumn to group samples based on frequency
     data[:,6] = np.floor(data[:,6]/10)
@@ -62,6 +64,9 @@ def get_training_data(file_train):
     # remove id column
     x = data[:,1:-1]
     y = data[:,-1]
+
+    if with_scale:
+       x = preprocessing.normalize(x) 
     return x, y
 
 def main():
@@ -72,7 +77,7 @@ def main():
     classifiers = get_classifiers(x,y)
     scores = cross_val_score(classifiers, x, y)
     
-    print '10-folds cross validation scores with label distribution: %s' % scores
+    print '10-folds cross validation scores with label distribution: \n%s' % scores
 
 if __name__ == '__main__':
     main()

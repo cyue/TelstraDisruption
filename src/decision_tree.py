@@ -8,11 +8,15 @@ from sklearn import cross_validation as cv
 from StringIO import StringIO
 import pydot
 
+import toolkit
+
 def get_training_data(file_train):
     data = np.genfromtxt(fname=file_train, delimiter=',')
+    # split log volumn to group samples based on frequency
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
+    # remove id column
     x = data[:,1:-1]
     y = data[:,-1]
     return x, y
@@ -23,11 +27,11 @@ def get_test_data(file_test):
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
-    return data[:,1:]
+    return data[:,1:], data[:,0]
 
 
-def train(x,y,depth=10):
-    classifier = dtc(max_depth=depth, presort=True)#criterion='entropy')
+def train(x,y,depth=None):
+    classifier = dtc(max_depth=depth, class_weight='balanced')
     scores = cv.cross_val_score(classifier, x, y, cv=10)
     
     classifier.fit(x, y)
@@ -39,7 +43,7 @@ def train(x,y,depth=10):
 
 def test(classifier, x):
     preds = classifier.predict(x)
-    return x, preds
+    return preds
 
 
 def decision_graph(classifier):
@@ -51,20 +55,15 @@ def decision_graph(classifier):
 
 def main():
     x, y = get_training_data('../train.csv')
-    data = get_test_data('../test.csv')
+    data, ids = get_test_data('../test.csv')
     c, scores, x_imp, y_imp = train(x,y)
-    x, preds = test(c,data)
-    decision_graph(c)
+    preds = test(c, data)
+    #decision_graph(c)
 
-    print scores
-    print x_imp
-    print y_imp
+    for tid, label in toolkit.vote(ids, preds):
+        print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
     main()
     
-
-    
-    
-
 

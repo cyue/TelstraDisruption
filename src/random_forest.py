@@ -28,7 +28,6 @@ def samples(file_train, size=5000):
 
 def train(x, y, depth=None):
     rfc = RandomForestClassifier(max_depth=depth)
-    rfc.fit(x,y)
     
     scores = cv.cross_val_score(rfc, x, y, cv=6)
     return scores, rfc
