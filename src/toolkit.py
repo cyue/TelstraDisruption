@@ -17,5 +17,10 @@ def vote(ids, predicts):
     
     for id in id_dict:
         # return id, the index(label) which is the majority
-        yield id, [item / np.max(id_dict[id]) for item in id_dict[id]]
+        label_list = [item / np.max(id_dict[id]) for item in id_dict[id]]
+        if np.sum(label_list) > 1:
+            # randomly set one to 0
+            label_list[label_list.index(1)] = 0
+            
+        yield id, label_list
         

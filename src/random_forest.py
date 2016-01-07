@@ -10,27 +10,41 @@ from matplotlib.pyplot import savefig
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn import cross_validation as cv
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, f1_score
+from sklearn import preprocessing
 
+import toolkit
 
 from StringIO import StringIO
 import pydot
 
-def samples(file_train, size=5000):
+def get_train_data(file_train, scale=True, size=None):
     data = np.genfromtxt(fname=file_train, delimiter=',')
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
     x = data[:size,1:-1]
+    if scale:
+        x = preprocessing.scale(x)
     y = data[:size, -1]
     return x, y
 
 
-def train(x, y, depth=None):
-    rfc = RandomForestClassifier(max_depth=depth)
+def get_test_data(file_test, scale=True):
+    data = np.genfromtxt(fname=file_test, delimiter=',') 
+    data[:,6] = np.floor(data[:,6]/10)
     
-    scores = cv.cross_val_score(rfc, x, y, cv=6)
-    return scores, rfc
+    x, ids = data[:,1:], data[:,0]
+    if scale:
+        x = preprocessing.scale(x)
+
+    return x, ids 
+
+def train(x, y, depth=None):
+    rfc = RandomForestClassifier(n_estimators=50, max_depth=depth, class_weight='balanced', n_jobs=-1)
+    
+    rfc.fit(x,y)
+    return rfc
 
 
 def evaluation(x, y, test_x, test_y):
@@ -79,30 +93,44 @@ def evaluation(x, y, test_x, test_y):
         ax.set_xlabel("Number of Estimators")
     savefig('../img/rf_estimators.jpg')
 
-def get_test_data(file_test):
-    data = np.genfromtxt(fname=file_test, delimiter=',') 
-    data[:,6] = np.floor(data[:,6]/10)
-    np.random.shuffle(data)
-    
-    return data[:,1:]
-
 
 
 def test(classifier, x):
     preds = classifier.predict(x)
-    return x, preds
+    return preds
 
+
+def print_r(scale=True, size=10000):
+    x, y = get_train_data('../train.csv')
+    if scale:
+        x = preprocessing.scale(x)
+
+    classifier = RandomForestClassifier(n_estimators=20, class_weight='balanced', n_jobs=-1)
+    accuracy = cv.cross_val_score(classifier, x, y, cv=10)
+
+    classifier = RandomForestClassifier(n_estimators=20, class_weight='balanced', n_jobs=-1)
+    
+    classifier.fit(x[:size],y[:size])
+    preds = classifier.predict(x[size:])
+    
+    f1 = f1_score(y[size:], preds, labels=[0.0,1.0,2.0], average='weighted')
+
+    print '%s\n%s' % (f1, accuracy)
 
 def main():
-    x, y = samples('../train.csv', size=50000)
-    test_x, test_y = samples('../train.csv', size=100)
-    data = get_test_data('../test.csv')
-
+    x, y = get_train_data('../train.csv')
+    data, ids = get_test_data('../test.csv')
+    rfc = train(x, y)
     #evaluation(x,y,test_x,test_y)
-    print train(x,y)[0]
+
+    preds = test(rfc, data)
+    print 'id,predict_0,predict_1,predict_2'
+    for tid, label in toolkit.vote(ids, preds):
+        print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
     main()
+    #print_r()
     
     
 
