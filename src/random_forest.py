@@ -40,13 +40,6 @@ def get_test_data(file_test, scale=True):
 
     return x, ids 
 
-def train(x, y, depth=None):
-    rfc = RandomForestClassifier(n_estimators=50, max_depth=depth, class_weight='balanced', n_jobs=-1)
-    
-    rfc.fit(x,y)
-    return rfc
-
-
 def evaluation(x, y, test_x, test_y):
     ''' plot the result of evaluation concerning 
         1. spliting features 
@@ -102,20 +95,28 @@ def test(classifier, x):
 
 def print_r(scale=True, size=10000):
     x, y = get_train_data('../train.csv')
-    if scale:
-        x = preprocessing.scale(x)
+    classifier = RandomForestClassifier(n_estimators=100, 
+                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
+    score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted')
 
-    classifier = RandomForestClassifier(n_estimators=20, class_weight='balanced', n_jobs=-1)
-    accuracy = cv.cross_val_score(classifier, x, y, cv=10)
-
-    classifier = RandomForestClassifier(n_estimators=20, class_weight='balanced', n_jobs=-1)
+    classifier = RandomForestClassifier(n_estimators=100, 
+                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
     
     classifier.fit(x[:size],y[:size])
-    preds = classifier.predict(x[size:])
+    preds = classifier.predict(x[size:2*size])
+    cm = confusion_matrix(y[size:2*size], preds)
     
-    f1 = f1_score(y[size:], preds, labels=[0.0,1.0,2.0], average='weighted')
+    print score
+    print cm
 
-    print '%s\n%s' % (f1, accuracy)
+
+def train(x, y, depth=None):
+    rfc = RandomForestClassifier(n_estimators=100, 
+                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
+    rfc.fit(x,y)
+    return rfc
+
+
 
 def main():
     x, y = get_train_data('../train.csv')

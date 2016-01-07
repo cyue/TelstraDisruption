@@ -5,7 +5,6 @@ import toolkit
 from sklearn.svm import SVC
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn import cross_validation as CV
-from sklearn.preprocessing import StandardScaler
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
@@ -43,17 +42,14 @@ def train(x, y):
     return svc
 
 
-def print_r(scale=True, size=2000):
+def print_r(scale=True, size=10000):
     x, y = get_training_data('../train.csv')
-    if scale:
-        x = preprocessing.scale(x)
-
     test, ids = get_test_data('../test.csv')
 
-    svc = SVC(C=0.1, kernel='rbf',class_weight='balanced',
-                decision_function_shape='ovr')
+    svc = SVC(C=0.1, kernel='rbf',
+                cache_size = 1000, decision_function_shape='ovr')
     svc = OneVsRestClassifier(svc)
-    scores = CV.cross_val_score(svc, x[:size], y[:size], cv=10, scoring='f1_weighted', n_jobs=-1)
+    scores = CV.cross_val_score(svc, x[:size], y[:size], cv=5, scoring='f1_weighted', n_jobs=-1)
     svc.fit(x[:size],y[:size])
 
     preds = svc.predict(x[size:2*size])

@@ -12,37 +12,29 @@ import pydot
 
 import toolkit
 
-def get_training_data(file_train):
+def get_training_data(file_train, scale=True, size=None):
     data = np.genfromtxt(fname=file_train, delimiter=',')
     # split log volumn to group samples based on frequency
     data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
     # remove id column
-    x = data[:,1:-1]
-    y = data[:,-1]
+    x = data[:size,1:-1]
+    if scale:
+        x = preprocessing.scale(x)
+    y = data[:size,-1]
     return x, y
 
 
-def get_test_data(file_test):
+def get_test_data(file_test, scale=True):
     data = np.genfromtxt(fname=file_test, delimiter=',') 
     data[:,6] = np.floor(data[:,6]/10)
-    np.random.shuffle(data)
 
-    return data[:,1:], data[:,0]
-
-
-def train(x,y,depth=None, scale=True):
+    x, ids = data[:,1:], data[:,0]
     if scale:
         x = preprocessing.scale(x)
-    
-    classifier = dtc(max_depth=depth, class_weight='balanced')
-    
-    classifier.fit(x, y)
-    ne0 = classifier.feature_importances_ != 0
-    y_imp = classifier.feature_importances_[ne0]
-    x_imp = np.arange(len(classifier.feature_importances_))[ne0]
-    return classifier, x_imp, y_imp
+
+    return x, ids
 
 
 def test(classifier, x):
@@ -62,8 +54,8 @@ def print_r(scale=True, size=10000):
     if scale:
         x = preprocessing.scale(x)
 
-    classifier = dtc(class_weight='balanced')
-    score = cv.cross_val_score(classifier, x, y, cv=10, scoring='roc_auc')
+    classifier = dtc(class_weight='balanced', max_features='auto')
+    score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted')
     
     #classifier = dtc(class_weight='balanced')
     #classifier.fit(x[:size],y[:size])
@@ -71,8 +63,23 @@ def print_r(scale=True, size=10000):
     
     #f1 = f1_score(y[size:], preds, labels=[0.0,1.0,2.0], average='weighted')
     
+    classifier.fit(x[:size], y[:size])
+    preds = classifier.predict(x[size:2*size])
+    cm = confusion_matrix(y[size:2*size], preds)
 
     print score
+    print cm
+
+
+def train(x,y,depth=None):
+    classifier = dtc(max_depth=depth, class_weight='balanced', 
+                        max_features='auto')
+    
+    classifier.fit(x, y)
+    ne0 = classifier.feature_importances_ != 0
+    y_imp = classifier.feature_importances_[ne0]
+    x_imp = np.arange(len(classifier.feature_importances_))[ne0]
+    return classifier, x_imp, y_imp
 
 
 def main():
@@ -87,7 +94,7 @@ def main():
         print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
-    #main()
-    print_r()
+    main()
+    #print_r()
     
 
