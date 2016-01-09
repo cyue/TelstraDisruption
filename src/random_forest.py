@@ -20,7 +20,7 @@ import pydot
 
 def get_train_data(file_train, scale=True, size=None):
     data = np.genfromtxt(fname=file_train, delimiter=',')
-    data[:,6] = np.floor(data[:,6]/10)
+    #data[:,6] = np.floor(data[:,6]/1)
     np.random.shuffle(data)
 
     x = data[:size,1:-1]
@@ -32,7 +32,7 @@ def get_train_data(file_train, scale=True, size=None):
 
 def get_test_data(file_test, scale=True):
     data = np.genfromtxt(fname=file_test, delimiter=',') 
-    data[:,6] = np.floor(data[:,6]/10)
+    #data[:,6] = np.floor(data[:,6]/1)
     
     x, ids = data[:,1:], data[:,0]
     if scale:
@@ -96,12 +96,13 @@ def test(classifier, x):
 def print_r(scale=True, size=10000):
     x, y = get_train_data('../train.csv')
     classifier = RandomForestClassifier(n_estimators=100, 
-                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
+                    min_samples_split=10, max_features = 'auto', 
+                    criterion='entropy', class_weight='balanced', n_jobs=-1)
     score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted')
 
     classifier = RandomForestClassifier(n_estimators=100, 
-                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
-    
+                    min_samples_split=10, max_features = 'auto', 
+                    criterion='entropy', class_weight='balanced', n_jobs=-1)
     classifier.fit(x[:size],y[:size])
     preds = classifier.predict(x[size:2*size])
     cm = confusion_matrix(y[size:2*size], preds)
@@ -112,7 +113,8 @@ def print_r(scale=True, size=10000):
 
 def train(x, y, depth=None):
     rfc = RandomForestClassifier(n_estimators=100, 
-                    max_features = 'auto', class_weight='balanced', n_jobs=-1)
+                    min_samples_split=10, max_features = 'auto', 
+                    criterion='gini', class_weight='balanced', n_jobs=-1)
     rfc.fit(x,y)
     return rfc
 

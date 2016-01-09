@@ -15,7 +15,7 @@ import toolkit
 def get_training_data(file_train, scale=True, size=None):
     data = np.genfromtxt(fname=file_train, delimiter=',')
     # split log volumn to group samples based on frequency
-    data[:,6] = np.floor(data[:,6]/10)
+    #data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
     # remove id column
@@ -28,7 +28,7 @@ def get_training_data(file_train, scale=True, size=None):
 
 def get_test_data(file_test, scale=True):
     data = np.genfromtxt(fname=file_test, delimiter=',') 
-    data[:,6] = np.floor(data[:,6]/10)
+    #data[:,6] = np.floor(data[:,6]/10)
 
     x, ids = data[:,1:], data[:,0]
     if scale:
@@ -54,8 +54,9 @@ def print_r(scale=True, size=10000):
     if scale:
         x = preprocessing.scale(x)
 
-    classifier = dtc(class_weight='balanced', max_features='auto')
-    score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted')
+    classifier = dtc(class_weight='balanced', max_features='auto',
+                    min_samples_split=10)
+    score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted', n_jobs=-1)
     
     #classifier = dtc(class_weight='balanced')
     #classifier.fit(x[:size],y[:size])
@@ -94,7 +95,7 @@ def main():
         print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
-    main()
-    #print_r()
+    #main()
+    print_r()
     
 
