@@ -19,7 +19,7 @@ def get_training_data(file_train, scale=True, size=None):
     np.random.shuffle(data)
 
     # remove id column
-    x = data[:size,1:-1]
+    x = data[:size,:-1]
     if scale:
         x = preprocessing.scale(x)
     y = data[:size,-1]
@@ -30,7 +30,7 @@ def get_test_data(file_test, scale=True):
     data = np.genfromtxt(fname=file_test, delimiter=',') 
     #data[:,6] = np.floor(data[:,6]/10)
 
-    x, ids = data[:,1:], data[:,0]
+    x, ids = data[:,:], data[:,0]
     if scale:
         x = preprocessing.scale(x)
 
@@ -95,7 +95,7 @@ def main():
         print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
-    #main()
+   # main()
     print_r()
     
 

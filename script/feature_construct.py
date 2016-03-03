@@ -1,12 +1,13 @@
 import sys
 import numpy as np
+from sklearn import preprocessing
 
-LOCATION = 1
+LOC_COUNT = 1
 EVENT_TYPE_COUNT = 50
 RES_TYPE_COUNT = 10
 SEV_TYPE_COUNT = 5
 LOG_FEATURE_COUNT = 400
-FEATURE_COUNT = LOCATION + EVENT_TYPE_COUNT + RES_TYPE_COUNT + \
+FEATURE_COUNT = LOC_COUNT + EVENT_TYPE_COUNT + RES_TYPE_COUNT + \
                 SEV_TYPE_COUNT + LOG_FEATURE_COUNT
 
 def extract_from_train(file_path):
@@ -43,7 +44,7 @@ def extract_from_event(file_path):
             yield id, event_type 
 
 
-def extract_from_resource(file_path):
+def extract_from_resource(file_path, discard=True):
     with open(file_path) as f:
         # skip header
         f.readline()
@@ -51,10 +52,13 @@ def extract_from_resource(file_path):
             line = line.strip().split(',')
             id = int(line[0])
             resource= int(line[1].split(' ')[1])
-            yield id, resource
+            if discard:
+                yield id, 0
+            else:
+                yield id, resource
 
 
-def extract_from_severity(file_path):
+def extract_from_severity(file_path, discard=True):
     with open(file_path) as f:
         # skip header
         f.readline()
@@ -62,10 +66,15 @@ def extract_from_severity(file_path):
             line = line.strip().split(',')
             id = int(line[0])
             severity = int(line[1].split(' ')[1])
-            yield id, severity
+            if discard:
+                yield id, 0
+            else:
+                yield id, severity
 
 
 def extract_from_log(file_path):
+    ''' standard scaling log volumn 
+    '''
     with open(file_path) as f:
         # skip header
         f.readline()
@@ -111,7 +120,6 @@ def construct(train, test, event, resource, severity, log):
             train_set[id][EVENT_TYPE_COUNT+res_type] = 1
         if id in test_set:
             test_set[id][EVENT_TYPE_COUNT+res_type] = 1
-            
         
     for id, sev_type in extract_from_severity(severity):
         if id in train_set:
@@ -138,14 +146,14 @@ def main():
 
     train_set, test_set = construct(train, test, event, 
             resource, severity, log)
-
-    print EVENT_TYPE_COUNT+RES_TYPE_COUNT+SEV_TYPE_COUNT+LOG_FEATURE_COUNT
     
-    with open('../train.dat', 'w') as f:
+    print FEATURE_COUNT
+
+    with open('../train_discard_res_severity.dat', 'w') as f:
         for id in train_set:
             f.write('%s,%s\n' % (id, ','.join([str(item) for item in train_set[id]])))
     
-    with open('../test.dat', 'w') as f:
+    with open('../test_discard_res_severity.dat', 'w') as f:
         for id in test_set:
             f.write('%s,%s\n' % (id, ','.join([str(item) for item in test_set[id]])))
 

@@ -1,0 +1,12 @@
+variance: 60
+All: 60
+MLPClassifier(activation='logistic', algorithm='adam', alpha=0.01,
+       batch_size=700, beta_1=0.9, beta_2=0.999, early_stopping=False,
+       epsilon=1e-08, hidden_layer_sizes=(100, 10),
+       learning_rate='invscaling', learning_rate_init=0.001, max_iter=500,
+       momentum=0.9, nesterovs_momentum=True, power_t=0.5,
+       random_state=None, shuffle=True, tol=0.0001,
+       validation_fraction=0.1, verbose=False, warm_start=False)
+Best F1 score is: 0.706
+F1 score of the rest is: [ 0.69850746  0.67065868  0.68168168  0.67267267  0.6996997   0.70783133]
+Kaggle score of all is: -1.0361037749

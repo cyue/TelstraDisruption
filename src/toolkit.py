@@ -1,6 +1,19 @@
 import numpy as np
 import sys
 
+
+def kaggle_scorer(y_truth, y_preds, proba):
+    n = len(y_truth)
+    m = np.unique(y_truth)
+    y_truth_matrix = np.zeros(m*n).reshape(n,m)
+    for idx, y in enumerate(y_truth):
+        y_truth_matrix[idx,y] = 1
+        
+    loss = -1./n * np.sum(y_truth_matrix * np.log(proba))
+    return loss
+
+
+
 def vote(ids, predicts):
     ''' vote the majority of predicts in one id 
     '''

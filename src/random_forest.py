@@ -10,7 +10,7 @@ from matplotlib.pyplot import savefig
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn import cross_validation as cv
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix, make_scorer
 from sklearn import preprocessing
 
 import toolkit
@@ -20,10 +20,10 @@ import pydot
 
 def get_train_data(file_train, scale=True, size=None):
     data = np.genfromtxt(fname=file_train, delimiter=',')
-    #data[:,6] = np.floor(data[:,6]/1)
+    data[:,6] = np.floor(data[:,6]/10)
     np.random.shuffle(data)
 
-    x = data[:size,1:-1]
+    x = data[:size,:-1]
     if scale:
         x = preprocessing.scale(x)
     y = data[:size, -1]
@@ -32,9 +32,9 @@ def get_train_data(file_train, scale=True, size=None):
 
 def get_test_data(file_test, scale=True):
     data = np.genfromtxt(fname=file_test, delimiter=',') 
-    #data[:,6] = np.floor(data[:,6]/1)
+    data[:,6] = np.floor(data[:,6]/10)
     
-    x, ids = data[:,1:], data[:,0]
+    x, ids = data, data[:,0]
     if scale:
         x = preprocessing.scale(x)
 
@@ -94,15 +94,16 @@ def test(classifier, x):
 
 
 def print_r(scale=True, size=10000):
-    x, y = get_train_data('../train.csv')
+    x, y = get_train_data('../train.csv', scale=False)
     classifier = RandomForestClassifier(n_estimators=100, 
                     min_samples_split=10, max_features = 'auto', 
-                    criterion='entropy', class_weight='balanced', n_jobs=-1)
+                    criterion='gini', class_weight='balanced', n_jobs=-1)
+    #scorer = make_scorer(toolkit.kaggle_scorer, 
     score = cv.cross_val_score(classifier, x, y, cv=10, scoring='f1_weighted')
 
     classifier = RandomForestClassifier(n_estimators=100, 
                     min_samples_split=10, max_features = 'auto', 
-                    criterion='entropy', class_weight='balanced', n_jobs=-1)
+                    criterion='gini', class_weight='balanced', n_jobs=-1)
     classifier.fit(x[:size],y[:size])
     preds = classifier.predict(x[size:2*size])
     cm = confusion_matrix(y[size:2*size], preds)
@@ -132,8 +133,8 @@ def main():
         print '%s,%s' % (tid, ','.join([np.str(item) for item in label]))
 
 if __name__ == '__main__':
-    main()
-    #print_r()
+    #main()
+    print_r()
     
     
 
